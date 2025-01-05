@@ -38,7 +38,6 @@ if(eastWest.value === "west"){
 longitude.value = `-${longitude.value}`
 }
 mapLocations.value = [latitude.value,longitude.value]
-console.log(northSouth.value,mapLocations.value)
 return mapLocation.value
 }
 watch(
@@ -116,7 +115,6 @@ provide("updateView",updateView)
 
 const signUphandler=()=>{
 view.value = 'signIn'
-console.log(view.value === 'signIn')
 }
 const changeView=(data)=>{
 view.value = data

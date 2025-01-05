@@ -1,5 +1,5 @@
 <script setup>
-import { ref,onMounted } from "vue";
+import { ref,onMounted ,provide} from "vue";
 import Search from "./components/Saerch.vue";
 import Navbar from "./components/Navbar.vue";
 import Mapview from "./components/Mapview.vue";
@@ -9,16 +9,16 @@ import {getYouTubeVideoDetails} from "./components/youtubeService.js"
 import Login from "./components/LoginPage.vue"
 import {useMapStore} from './stores/counter.js'
 const latestVideos = ref([])
-const filteredVideos = ref([])
 const randomVideo = ref("")
 const view = ref("homePage")
 const store = useMapStore()
 //load data youtube
 onMounted(async () => {
-  await store.loadVideos(); 
+  await store.loadVideos();
   if (store.videos && store.videos.length > 0) {
    latestVideos.value = getFiveLatestVideos()
    getRandomVideo()
+   store.currentVideo = randomVideo.value
   } else {
     console.warn("No videos available in the store.");
   }
@@ -41,40 +41,45 @@ randomVideo.value = store.videos[randomNumber]
 
 //category videos
 const categoryVideos =(category)=>{
- filteredVideos.value = store.videos.filter(video=>{
+
+ store.filteredVideos = store.videos.filter(video=>{
  return video.category === category
  })
  store.categoryStore.title = category
  view.value = 'categoryPage'
  }
+ //provide to child
+provide("categoryVideos",categoryVideos)
 //vedioClickhamdler
 const videoHandler=(video)=>{
 store.openVideoDetails(video);
-view.value='homePage' 
+view.value='homePage'
+}
+//allVideos
+const allVideos =()=>{
+store.filteredVideos = store.videos
+store.categoryStore.title = "All"
+view.value = 'categoryPage'
 }
 
-/* <iframe v-show="false"
-        :src="latestVideo.link" 
-        frameborder="0"
-        style="width: 100%; height: 100%;"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-      ></iframe> */
+const searchHandler =(data)=>{
+const searchQuery = data.toLowerCase().trim()
+ store.filteredVideos = store.filteredVideos.filter(video =>{
+return video.title.toLowerCase().trim().includes(searchQuery)
+})
+console.log(store.filteredVideos)
+}
 </script>
 <template>
     <div v-show="store.page === 'home' " class="main">
      <div v-show="view === 'homePage' ">
-        <div class="homeHeader">
-            <div>
-                <div class="proImg"></div>
-                <p>VlogWorld</p>
-            </div>
+     <div class="homeHeader">
+            <p>VlogWorld</p>
             <span class="material-symbols-outlined bellIcon">
                 notifications
             </span>
         </div>
         <h1>Discover,wonder,<span>Be curius!</span></h1>
-        <Search />
         <h2>Category</h2>
         <div class="mainCat">
             <span @click="categoryVideos('road trip')" class="roadTrip">
@@ -98,43 +103,57 @@ view.value='homePage'
             <span @click="categoryVideos('forest')" class="forest">
                 <h6>forest</h6>
             </span>
-            <span @click="categoryVideos('hotelResort')" class="hotelResort">
-                <h6>hotel and resort</h6>
+            <span @click="categoryVideos('hotel')" class="hotelResort">
+                <h6>hotel</h6>
             </span>
+            <span @click="allVideos()">
+              <h6>All</h6>
+            </span>
+            
         </div>
         <div class="headingSec">
             <h2>New added</h2>
-            <h6>see all</h6>
         </div>
   <div class="newAddedList">
     <div v-for="(latestVideo, index) in latestVideos" :key="index"  class="newAdded">
        <img @click="videoHandler(latestVideo)" :src="latestVideo.thumbnail ||'https://i.postimg.cc/Pxg76L7F/images.png' " />
+       <h6>
+         Explore <span>{{latestVideo.location}} </span> with <span> {{latestVideo.creater}} </span>
+       </h6>
     </div>
   </div>
         <div class="headingSec">
-            <h2>Near me</h2>
-            <h6>see all</h6>
+            <h2>Random</h2>
         </div>
         <div class="nearByList">
             <div class="videoBig">
               <img @click="videoHandler(randomVideo)" :src="randomVideo.thumbnail ||'https://i.postimg.cc/Pxg76L7F/images.png' " />
+              <h6>
+         Explore <span>{{randomVideo.location}} </span> with <span> {{randomVideo.creater}} </span>
+       </h6>
             </div>
         </div>
         </div>
      <div v-show="view === 'categoryPage' " class="categoryPage">
        <backHeader @click="view = 'homePage' "/>
-       <Search />
-      <p v-if="!filteredVideos || filteredVideos.length === 0">No videos found</p>
+       <Search @search = "searchHandler"/>
+      <p v-if="!store.filteredVideos || store.filteredVideos.length === 0">No videos found</p>
        <div class="categorylistPage">
-       <div @click="videoHandler(video)" v-for="video of filteredVideos">
+       <div class="videoBox" @click="videoHandler(video)" v-for="video of store.filteredVideos">
          <img  :src="video.thumbnail ||'https://i.postimg.cc/Pxg76L7F/images.png' " />
+         
          <p>{{video.title}}</p>
+         <div class="titles">
+         <h6>{{video.creater}}</h6>
+         <h6>{{video.publishedDate}}</h6>
+         </div>
+         <h6>{{video.location}}</h6>
             </div>
        </div>
      </div>
     </div>
     <Mapview v-show="store.page === 'mapPage' " />
-    <Login v-show="store.page === 'settings' " />
+    <Login v-show="store.page === 'loginPage' " />
     <VideoDetails v-show="store.page === 'videoDetails' "/>
     <Navbar v-if="view !== 'categoryPage'" />
 </template>
@@ -167,16 +186,12 @@ view.value='homePage'
     align-items: center;
     justify-content: space-between;
 }
-.homeHeader div {
-    display: flex;
-}
 .homeHeader p {
     color: #f5c266;
     font-size:2rem;
     font-weight:800;
     position:relative;
     z-index:2;
-    margin:1vh 0 0 17vw;
 }
 .homeHeader p::before{
 content:"";
@@ -245,7 +260,7 @@ h1 span {
 }
 h2 {
     font-size: 1.2rem;
-    color: #2b2b2b;
+    color: #717171;
     margin: 10px 0;
 }
 .mainCat {
@@ -258,6 +273,7 @@ h2 {
     overflow: scroll;
     scrollbar-color: transparent;
     position: relative;
+    
 }
 .mainCat span {
     width: 70px;
@@ -274,7 +290,7 @@ h2 {
     left: 0px;
     font-size: .8rem;
     text-align: center;
-    color: #313638;
+    color: #717171;
     font-weight: 800;
 }
 h1 {
@@ -303,19 +319,34 @@ h6 {
     width: 110%;
     height: 15vh;
     display: flex;
-    margin-left: -2vw;
+    margin-left:-3%;
 }
 .newAddedList .newAdded {
     width: 48%;
-    min-width:48%;
-    height:100%;
+    min-width:45%;
+    margin-top:-4%
 }
 .newAddedList img{
-width: 100%;
-height: 100%;
+width:100%;
+height: 105%;
 border-radius: 4px;
-background-position: center;
-object-fit: contain;
+clip-path:polygon(0% 13%,100% 13%,100% 87%,0% 87%);
+margin-top:-4%;
+position:relative;
+z-index:1
+}
+.newAddedList h6{
+color:#717171;
+font-size:0.5rem;
+margin-top:-19%;
+text-align:center;
+position:relative;
+z-index:100;
+background:transparent;
+backdrop-filter:blur(20px)
+}
+.newAddedList span{
+font-size:0.8rem;
 }
 .mainCat span:nth-child(1) {
     background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREvmO4Pz5V0EQb3_pJT6ZXivAOvrrll6y988SPNk_yNX8FquFPEteOQlw&s=10);
@@ -347,48 +378,101 @@ object-fit: contain;
     height: 30vh;
 }
 .categorylistPage{
-width:100%;
-height:100%;
 display:flex;
 flex-wrap:wrap;
-gap:10px
+gap:1%
 }
-.categorylistPage div{
-    width: 48%;
-    height: 50%;
-    min-width:45%;
-    margin-top:10px;
-    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+.categorylistPage .videoBox{
+    height:40%;
+    width:48%;
+    min-height:140px;
+    margin-top:3%;
+    background:transparent;
+    box-shadow: rgba(90, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  position:relative;
 }
-.categorylistPage div img{
+.categorylistPage img{
 width:100%;
-height:100%;
+height:50%;
+margin-top:-13%;
 background-position: center;
 background-size: cover;
-}
-.categorylistPage div p{
-color:#dc5454
-}
+object-fit:cover;
+clip-path:polygon(0% 13%,100% 13%,100% 89%,0% 89%);
 
+}
+.titles{
+display:flex;
+position:absolute;
+justify-content:space-between;
+align-items:center;
+padding:0 5%;
+bottom:1%;
+width:100%;
+height:10%;
+}
+.categorylistPage p{
+color:#f5c266;
+margin-top:-11%;
+font-size:0.5rem;
+min-height:5%;
+text-wrap:nowrap;
+overflow:hidden;
+background:#dc5454;
+padding:2% 5%
+}
+.categorylistPage h6{
+font-size:1rem;
+color:#717171;
+text-transform:uppercase;
+text-align:center;
+background:#ccc
+}
+.titles h6{
+font-size:0.6rem;
+color:#717171;
+text-transform:uppercase;
+background:transparent
 
+}
 .videoBig {
     width: 80%;
     height: 100%;
-    border: 1px solid black;
     margin-left: 9%;
     margin-top:10px;
-    background-image: url(https://i.postimg.cc/YCr7bKSY/pexels-jake-pnw-1761282.jpg);
-    background-position: center;
-    background-size: cover;
+    box-shadow: rgba(90, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
 }
 .videoBig img{
 width:100%;
-height:100%;
+height:120%;
+clip-path:polygon(0% 13%,100% 13%,100% 87%,0% 87%);
+margin-top:-13%
 }
 .categoryPage p:nth-child(3) {
 text-align:center;
 font-size:2rem;
 color:#dc5454;
 margin-top:50%;
+}
+.videoBig h6{
+color:#717171;
+font-size:1rem;
+margin-top:-19%;
+text-align:center;
+position:relative;
+z-index:100;
+background:transparent;
+backdrop-filter:blur(20px)
+}
+.videoBig span{
+font-size:2rem;
+}
+.sidebar{
+width:40%;
+height:100%;
+background:white;
+position:fixed;
+right:0;
+z-index:100;
 }
 </style>

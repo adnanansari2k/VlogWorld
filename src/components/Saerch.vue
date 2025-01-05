@@ -1,14 +1,17 @@
-<script setup></script>
+<script setup>
+import {ref,defineEmits} from 'vue'
+const searchKeyWord = ref("")
+const emit = defineEmits(["search"])
+const searchVideo = () =>{
+emit('search',searchKeyWord.value)
+}
+</script>
 <template>
   <div>
-  <span class="material-symbols-outlined s">
-search
-</span>
-  <input placeholder="Search your trip">
+  <input v-model="searchKeyWord" @keyup.enter="searchVideo" placeholder="Search your trip" />
   <span class="material-symbols-outlined m">
-mic
+tune
 </span>
-  </input>
   </div>
 </template>
 <style scoped>
@@ -19,23 +22,18 @@ mic
   align-items:center;
   }
   input{
-  width:95%;
+  width:90%;
   height:100%;
   border-radius:10px;
   background:#ddd;
-  padding:0 30%;
+  padding:0 2%;
   border:0;
-  color:#313638
+  color:#313638;
  }
   input:focus{
   outline:0
   }
-  .s{
-  position:absolute;
-  left:18px
-  }
   .m{
-  position:absolute;
-  left:85%
+  font-size:1.6rem
   }
 </style>

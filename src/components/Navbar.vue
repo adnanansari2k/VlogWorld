@@ -18,7 +18,7 @@
              <p>Save</p>
         </div>
         <div>
-            <span @click="store.setPage('settings')" class="material-symbols-outlined"> settings </span>
+           <span @click="store.setPage('loginPage')" class="material-symbols-outlined"> settings </span>
              <p>Setting</p>
         </div>
     </div>
@@ -34,6 +34,7 @@
     background: #fafefe;
     justify-content:space-around;
     text-align:center;
+    z-index:1000
 }
 .nav div{
 width:25%;

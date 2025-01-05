@@ -12,7 +12,7 @@ arrow_back
 </template>
 <style scoped>
   div{
-  width:65%;
+  width:60%;
   height:5%;
   display:flex;
   justify-content:space-between;
@@ -21,5 +21,8 @@ arrow_back
   text-transform:uppercase;
   font-weight:400;
   letter-spacing:2px
+  }
+  p{
+  
   }
 </style>

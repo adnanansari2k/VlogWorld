@@ -1,7 +1,6 @@
 <script setup>
   import {useMapStore} from '../stores/counter.js'
   const store = useMapStore()
-  console.log(store.page)
 </script>
 <template>
     <div class="nav">

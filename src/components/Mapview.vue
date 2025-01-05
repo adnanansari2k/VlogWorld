@@ -56,7 +56,6 @@ addMarkers()
 
 //delete Markers
 const deleteAllMarkers = () => {
-    console.log(map,"map")
     if (!map) return;
     if (isZooming) {
         console.log("Skipping marker deletion during zoom");
@@ -99,7 +98,7 @@ const getLocationFromCoordinates = async (lat, lng) => {
     try {
         const response = await fetch(url);
         const data = await response.json();
-        console.log(data);
+
         if (data && data.address) {
             const location = data.address;
             return location;
@@ -146,7 +145,6 @@ return matchesCountry && matchesCategory && matchesCreater
 })
 
 addMarkers()
-console.log(filteredVideos.value)
 }
 onUnmounted(() => {
     if (map) {

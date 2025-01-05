@@ -24,10 +24,10 @@ const initializeMap = () => {
             attribution: "© OpenStreetMap contributors"
         }).addTo(map);}
 addMarkers()
-        map.on("zoomstart", () => {console.log("Map during zoomstart:")
+        map.on("zoomstart", () => {
         isZooming = true
         });
-        map.on("zoomend", () => {console.log("Map during zoomend:")
+        map.on("zoomend", () => {
         isZooming = false
         
         deleteAllMarkers()
@@ -39,8 +39,6 @@ addMarkers()
         // Fetch the location from coordinates
         const location = await getLocationFromCoordinates(ev.latlng.lat, ev.latlng.lng);
         if (!location || !location.country) {
-            console.error("Country information is missing from location data");
-            alert("Country information could not be found for this location.");
             return;
         }
 
@@ -58,7 +56,6 @@ addMarkers()
 const deleteAllMarkers = () => {
     if (!map) return;
     if (isZooming) {
-        console.log("Skipping marker deletion during zoom");
         return; // Skip marker deletion during zoom
     }
     allMarkers.value.forEach((marker) => {
@@ -73,7 +70,6 @@ const addMarkers = () => {
       
       deleteAllMarkers()
        if (isZooming) {
-        console.log("Skipping marker updates during zoom");
         return; // Skip marker updates during zoom
     }
      filteredVideos.value.forEach((marker) => {

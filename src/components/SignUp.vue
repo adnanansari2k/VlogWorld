@@ -28,7 +28,8 @@ import {useToast} from 'vue-toastification'
     })
     toast.success("user created")
   } catch (error) {
-    toast.error(error)
+    toast.error(error,user)
+    
   }
 };
   

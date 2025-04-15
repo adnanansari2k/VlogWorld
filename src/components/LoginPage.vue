@@ -93,6 +93,7 @@ const submit = async () => {
     };
     
     // Add video data to Firestore
+    console.log(videoData)
     await addDoc(collection(db, "videos"), videoData);
     store.user.addedVideos.push(videoData)
    store.saveMineVideosToFire()

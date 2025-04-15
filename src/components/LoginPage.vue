@@ -39,7 +39,7 @@ longitude.value = `-${longitude.value}`
 }
   console.log(latitude.value,longitude.value)
 mapLocations.value = [latitude.value,longitude.value]
-return mapLocation.value
+return mapLocations.value
 }
 watch(
   () => store.isLoggedIn,

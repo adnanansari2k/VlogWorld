@@ -73,6 +73,7 @@ const addMarkers = () => {
         return; // Skip marker updates during zoom
     }
      filteredVideos.value.forEach((marker) => {
+      console.log(marker)
     
         const leafletMarker = L.marker([marker.mapLocation[0].trim(),marker.mapLocation[1].trim()]).addTo(map);
         leafletMarker.on("click", () => {

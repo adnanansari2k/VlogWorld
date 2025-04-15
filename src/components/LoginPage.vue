@@ -37,6 +37,7 @@ latitude.value = `-${latitude.value}`
 if(eastWest.value === "west"){
 longitude.value = `-${longitude.value}`
 }
+  console.log(latitude.value,longitude.value)
 mapLocations.value = [latitude.value,longitude.value]
 return mapLocation.value
 }
@@ -180,7 +181,7 @@ creater.value = prompt("Create name")
         <div>
         <label for="Category">Categories</label>
         <select @change="newCategoryAdd" v-model="category" id="categories">
-        <option v-for="category in store.allCategories" :key="category" value="category">{{category}}</option>
+        <option v-for="category in store.allCategories" :key="category" :value="category">{{category}}</option>
         <option value="addNew">Add New</option>
         </select>
         </div>
